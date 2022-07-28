@@ -108,7 +108,7 @@ AC_SUBST(WITH_SIM, $with_sim)
 
 AC_ARG_ENABLE(multilib,
 	[AS_HELP_STRING([--enable-multilib],
-		[build both RV32 and RV64 runtime libraries (only RV64 for musl libc) @<:@--disable-multilib@:>@])],
+		[build both RV32, RV64 and RV128 runtime libraries (only RV64 for musl libc) @<:@--disable-multilib@:>@])],
 	[],
 	[enable_multilib=no]
 	)
@@ -130,15 +130,15 @@ AS_IF([test "x$enable_multilib" != xno || test "x$with_multilib_generator" != xn
 	[AC_SUBST(multilib_flags,--disable-multilib)])
 
 AS_IF([test "x$enable_multilib" != xno],
-        [AC_SUBST(glibc_multilib_names,"rv32imac-ilp32 rv32imafdc-ilp32d rv64imac-lp64 rv64imafdc-lp64d")],
+        [AC_SUBST(glibc_multilib_names,"rv32imac-ilp32 rv32imafdc-ilp32d rv64imac-lp64 rv64imafdc-lp64d rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d")],
         [AC_SUBST(glibc_multilib_names,"$with_arch-$with_abi")])
 
 AS_IF([test "x$enable_multilib" != xno],
-        [AC_SUBST(newlib_multilib_names,"rv32i-ilp32 rv32iac-ilp32 rv32im-ilp32 rv32imac-ilp32 rv32imafc-ilp32f rv64imac-lp64 rv64imafdc-lp64d")],
+        [AC_SUBST(newlib_multilib_names,"rv32i-ilp32 rv32iac-ilp32 rv32im-ilp32 rv32imac-ilp32 rv32imafc-ilp32f rv64imac-lp64 rv64imafdc-lp64d rv128i-llp128 rv128im-llp128 rv128ima-llp128 rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d")],
         [AC_SUBST(newlib_multilib_names,"$with_arch-$with_abi")])
 
 AS_IF([test "x$enable_multilib" != xno],
-        [AC_SUBST(musl_multilib_names,"rv64imac-lp64 rv64imafdc-lp64d")],
+        [AC_SUBST(musl_multilib_names,"rv128i-llp128 rv128im-llp128 rv128-ima-llp128 rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d rv64imac-lp64 rv64imafdc-lp64d")],
         [AC_SUBST(musl_multilib_names,"$with_arch-$with_abi")])
 
 AC_ARG_ENABLE(gcc-checking,

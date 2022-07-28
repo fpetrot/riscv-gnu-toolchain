@@ -3417,7 +3417,7 @@ else
 fi
 
 if test "x$enable_multilib" != xno; then :
-  glibc_multilib_names="rv32imac-ilp32 rv32imafdc-ilp32d rv64imac-lp64 rv64imafdc-lp64d"
+  glibc_multilib_names="rv32imac-ilp32 rv32imafdc-ilp32d rv64imac-lp64 rv64imafdc-lp64d rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d"
 
 else
   glibc_multilib_names="$with_arch-$with_abi"
@@ -3425,7 +3425,7 @@ else
 fi
 
 if test "x$enable_multilib" != xno; then :
-  newlib_multilib_names="rv32i-ilp32 rv32iac-ilp32 rv32im-ilp32 rv32imac-ilp32 rv32imafc-ilp32f rv64imac-lp64 rv64imafdc-lp64d"
+  newlib_multilib_names="rv32i-ilp32 rv32iac-ilp32 rv32im-ilp32 rv32imac-ilp32 rv32imafc-ilp32f rv64imac-lp64 rv64imafdc-lp64d rv128i-llp128 rv128im-llp128 rv128ima-llp128 rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d"
 
 else
   newlib_multilib_names="$with_arch-$with_abi"
@@ -3433,7 +3433,7 @@ else
 fi
 
 if test "x$enable_multilib" != xno; then :
-  musl_multilib_names="rv64imac-lp64 rv64imafdc-lp64d"
+  musl_multilib_names="rv128i-llp128 rv128im-llp128 rv128-ima-llp128 rv128imac-llp128 rv128imafc-llp128f rv128imafdc-llp128d rv64imac-lp64 rv64imafdc-lp64d"
 
 else
   musl_multilib_names="$with_arch-$with_abi"
