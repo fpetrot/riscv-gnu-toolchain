@@ -67,7 +67,11 @@ GCC_CHECKING_FLAGS := @gcc_checking@
 
 XLEN := $(shell echo $(WITH_ARCH) | tr A-Z a-z | sed 's/.*rv\([0-9]*\).*/\1/')
 ifneq ($(XLEN),32)
+  ifneq ($(XLEN),64)
+	XLEN := 128
+  else
 	XLEN := 64
+  endif
 endif
 
 make_tuple = riscv$(1)-unknown-$(2)
@@ -186,6 +190,9 @@ SIM_STAMP+= stamps/build-pk32
 endif
 ifneq (,$(findstring rv64,$(NEWLIB_MULTILIB_NAMES)))
 SIM_STAMP+= stamps/build-pk64
+endif
+ifneq (,$(findstring rv128,$(NEWLIB_MULTILIB_NAMES)))
+SIM_STAMP+= stamps/build-pk128
 endif
 else
 ifeq ($(SIM),gdb)
@@ -843,6 +850,18 @@ stamps/build-pk64: $(PK_SRCDIR) stamps/build-gcc-newlib-stage2
 	mkdir -p $(dir $@)
 	date > $@
 
+stamps/build-pk128: $(PK_SRCDIR) stamps/build-gcc-newlib-stage2
+	rm -rf $@ $(notdir $@)
+	mkdir $(notdir $@)
+	cd $(notdir $@) && $</configure \
+		--prefix=$(INSTALL_DIR) \
+		--host=$(NEWLIB_TUPLE) \
+		--with-arch=rv128imac
+	$(MAKE) -C $(notdir $@)
+	cp $(notdir $@)/pk $(INSTALL_DIR)/$(NEWLIB_TUPLE)/bin/pk128
+	mkdir -p $(dir $@)
+	date > $@
+
 stamps/build-qemu: $(QEMU_SRCDIR) $(QEMU_SRC_GIT)
 	rm -rf $@ $(notdir $@)
 	mkdir $(notdir $@)
@@ -891,7 +910,7 @@ stamps/check-dhrystone-newlib-%: \
 		$(wildcard $(srcdir)/test/benchmarks/dhrystone/*)
 	$(eval $@_ARCH := $(word 4,$(subst -, ,$@)))
 	$(eval $@_ABI := $(word 5,$(subst -, ,$@)))
-	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$($@_ARCH))))
+	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$(patsubst rv128%,128,$($@_ARCH)))))
 	$(SIM_PREPARE) $(srcdir)/test/benchmarks/dhrystone/check -march=$($@_ARCH) -mabi=$($@_ABI) -cc=riscv$(XLEN)-unknown-elf-gcc -objdump=riscv$(XLEN)-unknown-elf-objdump -sim=riscv$($@_XLEN)-unknown-elf-run -out=$@ $(filter %.c,$^) || true
 
 stamps/check-dhrystone-newlib-nano-%: \
@@ -900,7 +919,7 @@ stamps/check-dhrystone-newlib-nano-%: \
 		$(wildcard $(srcdir)/test/benchmarks/dhrystone/*)
 	$(eval $@_ARCH := $(word 5,$(subst -, ,$@)))
 	$(eval $@_ABI := $(word 6,$(subst -, ,$@)))
-	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$($@_ARCH))))
+	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$(patsubst rv128%,128,$($@_ARCH)))))
 	$(SIM_PREPARE) $(srcdir)/test/benchmarks/dhrystone/check -march=$($@_ARCH) -mabi=$($@_ABI) -specs=nano.specs -cc=riscv$(XLEN)-unknown-elf-gcc -objdump=riscv$(XLEN)-unknown-elf-objdump -sim=riscv$($@_XLEN)-unknown-elf-run -out=$@ $(filter %.c,$^) || true
 
 .PHONY: check-dhrystone-linux
@@ -912,7 +931,7 @@ stamps/check-dhrystone-linux-%: \
 		$(wildcard $(srcdir)/test/benchmarks/dhrystone/*)
 	$(eval $@_ARCH := $(word 4,$(subst -, ,$@)))
 	$(eval $@_ABI := $(word 5,$(subst -, ,$@)))
-	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$($@_ARCH))))
+	$(eval $@_XLEN := $(patsubst rv32%,32,$(patsubst rv64%,64,$(patsubst rv128%,128,$($@_ARCH)))))
 	$(SIM_PREPARE) $(srcdir)/test/benchmarks/dhrystone/check -march=$($@_ARCH) -mabi=$($@_ABI) -cc=riscv$(XLEN)-unknown-elf-gcc -objdump=riscv$(XLEN)-unknown-elf-objdump -sim=riscv$($@_XLEN)-unknown-elf-run -out=$@ $(filter %.c,$^) || true
 
 stamps/check-binutils-newlib: stamps/build-gcc-newlib-stage2 $(SIM_STAMP) stamps/build-dejagnu

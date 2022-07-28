@@ -74,12 +74,18 @@ def parse_version(ext_str, idx):
 def parse_march(march):
     if len(march) < 5:
         return None
-    march = march.replace("rv64g", "rv64imafd").replace("rv32g", "rv32imafd")
+    march = march.replace("rv128g", "rv128imafd").replace("rv64g", "rv64imafd").replace("rv32g", "rv32imafd")
+    is_128 = False
     if march[0:5] not in ['rv64i', 'rv32i', 'rv32e']:
-        print (march[0:5])
-        return None
+        if march[0:6] not in ['rv128i']:
+            print (march[0:5])
+            return None
+        else:
+            is_128 = True
 
     ext_str = march[4:]
+    if is_128:
+        ext_str = march[5:]
     idx = 0
     extstrlens = len(ext_str)
     exts = dict()
@@ -117,6 +123,11 @@ def conver_arch_to_qemu_cpu_opt(march):
     ext_dict = parse_march(march)
 
     cpu_opt = []
+
+    # rv128 qemu is a currently included in rv64
+    if len(march) == 5:
+      march = ['r', 'v', '6', '4']
+
     cpu_opt.append(march[0:4]) # rv32 or rv64
 
     vlen = get_vlen(ext_dict)
@@ -130,7 +141,7 @@ def conver_arch_to_qemu_cpu_opt(march):
     return ",".join(cpu_opt)
 
 def selftest():
-    print(parse_march("rv64gc"))
+    print(parse_march("rv128gc"))
 
 def main(argv):
     opt = parse_opt(argv)

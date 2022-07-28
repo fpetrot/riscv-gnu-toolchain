@@ -51,17 +51,17 @@ AS_IF([test "x$enable_linux" != xno],
 	[AC_SUBST(default_target, newlib)])
 
 AC_ARG_WITH(arch,
-	[AS_HELP_STRING([--with-arch=rv64imafdc],
-		[Sets the base RISC-V ISA, defaults to rv64imafdc])],
+	[AS_HELP_STRING([--with-arch=rv128imac],
+		[Sets the base RISC-V ISA, defaults to rv128imac])],
 	[],
-	[with_arch=rv64imafdc]
+	[with_arch=rv128imac]
 	)
 
 AC_ARG_WITH(abi,
-	[AS_HELP_STRING([--with-abi=lp64d],
-		[Sets the base RISC-V ABI, defaults to lp64d])],
+	[AS_HELP_STRING([--with-abi=llp128],
+		[Sets the base RISC-V ABI, defaults to llp128d])],
 	[],
-	[with_abi=default]
+	[with_abi=llp128]
 	)
 
 AC_ARG_WITH(tune,
@@ -87,6 +87,9 @@ AC_ARG_WITH(sim,
 
 AS_IF([test "x$with_abi" = xdefault],
 	[AS_CASE([$with_arch],
+		[*rv128g* | *rv128*d*], [with_abi=llp128d],
+		[*rv128*f*], [with_abi=llp128f],
+		[*rv128*], [with_abi=llp128],
 		[*rv64g* | *rv64*d*], [with_abi=lp64d],
 		[*rv64*f*], [with_abi=lp64f],
 		[*rv64*], [with_abi=lp64],
