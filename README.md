@@ -111,6 +111,7 @@ RISC-V 128-bit is selected as default arch on this branch.
 Available arch options are rv128i, rv28im, rv128ima, rv128imac, rv128imafc, rv128imafdc.
 Available ABI options are llp128, llp128f, llp128d
 128-bit support is experimental, known issues are :
+
     - soft floating point operations have erratic behaviour, support for 128-bit words is not done
     - hard floating points moves (fmv) are currently seen as illegal by qemu
     - gdb somtimes crashs in case of memory accesse
