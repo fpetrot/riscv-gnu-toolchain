@@ -119,6 +119,14 @@ Available ABI options are llp128, llp128f, llp128d
 - linux configuration is not supported
 - musl configuration is not supported
 
+A typical way to configure and compile the 128-bit toolchain (with libs
+for all 128-bit configurations) is:
+
+    $ mkdir build && cd build
+    $ ../configure --enable-multilib --with-cmodel=medany --prefix=/tmp/rv128
+    $ CFLAGS=-O0 && CXXFLAGS=-O2 make -j
+
+
 ### Troubleshooting Build Problems
 
 Builds work best if installing into an empty directory.  If you build a
