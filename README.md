@@ -124,7 +124,7 @@ for all 128-bit configurations) is:
 
     $ mkdir build && cd build
     $ ../configure --enable-multilib --with-cmodel=medany --prefix=/tmp/rv128 
-    $ CFLAGS=-O0 && CXXFLAGS=-O2 make -j
+    $ CFLAGS=-O0 && CXXFLAGS=-O0 make -j
 
 
 ### Troubleshooting Build Problems
