@@ -1,10 +1,10 @@
 [submodule "riscv-binutils"]
 	path = riscv-binutils
-	url = git@gricad-gitlab.univ-grenoble-alpes.fr:petrotf/binutils-gdb.git
+	url = git@github.com:fpetrot/binutils-gdb.git
 	branch = dev/128
 [submodule "riscv-gcc"]
 	path = riscv-gcc
-	url = https://gricad-gitlab.univ-grenoble-alpes.fr/noirys/riscv-gcc.git
+	url = git@github.com:fpetrot/riscv-gcc.git
 	branch = dev/128
 [submodule "glibc"]
 	path = glibc
@@ -15,15 +15,15 @@
 	branch = riscv-dejagnu-1.6
 [submodule "newlib"]
 	path = newlib
-	url = https://gricad-gitlab.univ-grenoble-alpes.fr/noirys/newlib.git
+	url = git@github.com:fpetrot/newlib.git
 	branch = dev/128
 [submodule "riscv-gdb"]
 	path = riscv-gdb
-	url = git@gricad-gitlab.univ-grenoble-alpes.fr:petrotf/binutils-gdb.git
+	url = git@github.com:fpetrot/binutils-gdb.git
 	branch = dev/128
 [submodule "qemu"]
 	path = qemu
-	url = https://github.com/fpetrot/qemu-riscv128.git
+	url = git@github.com:fpetrot/qemu-riscv128.git
 	branch = elf128
 [submodule "musl"]
 	path = musl
