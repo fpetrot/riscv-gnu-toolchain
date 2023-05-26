@@ -8,7 +8,7 @@ This was a kind of a fork of https://github.com/riscv-collab/riscv-gnu-toolchain
 But now that almost all riscv specific stuff has been upstreamed, there is no clear reason to (try to) maintain this stuff that is in essence a set of moving pointers.
 
 To make things easier (...) it is now under the form of a docker file that fetches the rights repositories and builds the whole stuff.
-This is necessary because the binutils require specific version for the autotools (documented in binutils README-maintainer-mode).
+This is necessary because the binutils require specific versions for the autotools (documented in binutils README-maintainer-mode) when building from scratch.
 All tools sources are kept after building, since this docker is meant to be used for active development.
 
 The docker image contains also a native `gdb` since there are still many bugs floating around, along with `vim` and a base configuration file, so you might get started quickly.
@@ -38,7 +38,7 @@ All of that is within the docker, along with our 128-bit unit tests.
 Check the makefiles and qemu invocation there for examples.
 
 Building and using the docker image
-=========================
+===================================
 
 ```
 $ docker build . -t rv128
@@ -52,7 +52,7 @@ $ docker exec -it /dev/128 bash
 This is not the recommended use of docker, but I find it pretty adapted to the need.
 
 Thanks
-=========================
+======
 
 I would like to thank Fabien Portas and Sylvain Noiry (both student at Ensimag at that time) for their majors contributions in supporting 128-bit in QEMU and the GNU toolchain, respectively.
-I would like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project).
+I would also like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project).
