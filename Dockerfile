@@ -3,7 +3,7 @@
 FROM debian:bookworm-slim
 
 LABEL maintainer="Frédéric Pétrot <frederic.petrot@univ-grenoble-alpes.fr>"
-LABEL Description="Image to (cross-)build the binutils in maintainer mode"
+LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards"
 
 #
 # Set environment
