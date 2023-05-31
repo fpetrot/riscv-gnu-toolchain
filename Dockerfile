@@ -133,6 +133,7 @@ RUN cd riscv-gcc && \
     CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$HOMEDIR/sandbox \
                                                    --target=riscv128-unknown-elf \
                                                    --enable-languages=c \
+                                                   --enable-multilib \
                                                    --with-cmodel=medany \
                                                    --disable-libssp \
                                                    --disable-nls
@@ -141,6 +142,25 @@ RUN cd riscv-gcc/build && \
 
 RUN cd riscv-gcc && \
     git remote add upstream https://gcc.gnu.org/git/gcc.git
+
+#
+# Let's clone newlib and compile it
+# Again many warning, easily explainable because we are really just trying to
+# compile the library and have it kinda work, many things to do still
+#
+# This is to be compiled using our newly created gcc
+#
+ENV PATH="/home/fred/sandbox/bin:$PATH"
+
+RUN git clone https://github.com/fpetrot/newlib.git
+
+RUN cd newlib && \
+    mkdir build && \
+    cd build && \
+    ../configure --prefix=/home/fred/sandbox --target=riscv128-unknown-elf
+
+RUN cd newlib/build && \
+    make -j $((1 + $(nproc) / 2)) && make install
 
 USER root
 RUN apt-get install -y --no-install-recommends --no-install-suggests \
