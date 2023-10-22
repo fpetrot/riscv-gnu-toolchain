@@ -98,12 +98,13 @@ Note that `file` returns UNKNOWN for `ELFCLASS128` currently, unless you change 
         Elf128_Xxword sh_entsize;
     } Elf128_Shdr;
 
+## ELF Compressed Section Header
     typedef struct {
         Elf128_Word   ch_type;
         Elf128_Word   ch_reserved[3];
         Elf128_Xxword ch_size;
         Elf128_Xxword ch_addralign;
-    } Elf64_Chdr;
+    } Elf128_Chdr;
 
 Notes:
 
