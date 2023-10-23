@@ -157,15 +157,15 @@ RUN git clone https://github.com/fpetrot/newlib.git
 RUN cd newlib && \
     mkdir build && \
     cd build && \
-    ../configure --prefix=/home/fred/sandbox --target=riscv128-unknown-elf
+    ../configure --prefix=$HOMEDIR/sandbox --target=riscv128-unknown-elf
 
 RUN cd newlib/build && \
     make -j $((1 + $(nproc) / 2)) && make install
 
 USER root
 RUN apt-get install -y --no-install-recommends --no-install-suggests \
-            python3-minimal meson ninja-build pkgconf libglib2.0-dev \
-            libpixman-1-dev libcapstone-dev
+            python3-minimal python3-venv meson ninja-build pkgconf libglib2.0-dev \
+            libpixman-1-dev libcapstone-dev libfdt-dev
 USER $USER
 #
 # Fetch QEMU
