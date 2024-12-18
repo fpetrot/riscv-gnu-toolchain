@@ -1,6 +1,6 @@
 # vim: tw=0: ai: sw=2: ts=2: sts=2: lbr: et: list
 
-FROM debian:bookworm-slim
+FROM debian:stable-slim
 
 LABEL maintainer="Frédéric Pétrot <frederic.petrot@univ-grenoble-alpes.fr>"
 LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards"
