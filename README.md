@@ -42,10 +42,10 @@ Building and using the docker image
 
 ```
 $ docker build . -t rv128
-$ docker run --name dev/128 -tid rv128 bash
-$ docker attach dev/128
+$ docker run --name dev128 -tid rv128 bash
+$ docker attach dev128
 # And if you need several shells in the container, with, e.g. tmux
-$ docker exec -it /dev/128 bash
+$ docker exec -it dev128 bash
 ```
 
 `scp` is available, so you can copy from the host your `.gitconfig` and `.ssh` directories to access the git repos at will.
@@ -56,3 +56,24 @@ Thanks
 
 I would like to thank Fabien Portas and Sylvain Noiry (both student at Ensimag at that time) for their majors contributions in supporting 128-bit in QEMU and the GNU toolchain, respectively.
 I would also like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project).
+
+Optimistic Quote
+======
+
+"_We might never build 128-bit computers, but it would probably be good
+to invent a notation for 128-bit integers, whose generated code on 64-bit
+CPUs is about the same as 64-bit code
+is on 32-bit CPUs. It would be nice to
+do that long before it is really needed. In general, predictable long-term
+problems are most efficiently solved
+with a little planning, not with frenzied efforts when the problem is imminent. Fortunately, 128-bitters are many
+years away, if ever (maybe 2020–2040),
+because we’ve just multiplied our addressing size by four billion, and that
+will last a while, even if Moore’s Law
+continues that long! In case 128-bit
+happens in 2020, however, it would be
+wise to be thinking about the next integer size around 2010_"
+
+John Mashey. "The long road to 64 bits." Communications of the ACM 52.1 (2009): 45-53.
+
+Thanks to Eduardo Tomasi for pointing out this paper.
