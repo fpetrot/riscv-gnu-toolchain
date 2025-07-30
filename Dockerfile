@@ -3,7 +3,7 @@
 FROM debian:stable-slim
 
 LABEL maintainer="Frédéric Pétrot <frederic.petrot@univ-grenoble-alpes.fr>"
-LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards"
+LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards and also cva6 processor"
 
 #
 # Set environment
@@ -19,12 +19,58 @@ ENV USER=fred
 # Dependencies
 #
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests \
-            apt-utils less build-essential bison flex \
-            libgmp-dev libmpfr-dev libmpc-dev libexpat1-dev libdebuginfod-dev \
-            ca-certificates git curl xsltproc babeltrace \
-            file texinfo gperf expect vim vim-gitgutter openssh-client && \
-    apt-get autoclean && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --no-install-suggests \
+        apt-utils \
+        autoconf \
+        automake \
+        autotools-dev \
+        babeltrace \
+        bc \
+        bison \
+        build-essential \
+        ca-certificates \
+        ccache \
+        # clang \
+        cmake \
+        curl \
+        device-tree-compiler \
+        expect \
+        file \
+        flex \
+        gawk \
+        # gdb \
+        gperf \
+        git \
+        gtkwave \
+        help2man \
+        less \
+        libdebuginfod-dev \
+        libexpat1-dev \
+        libfl-dev \
+        libfl2 \
+        libgmp-dev \
+        libgoogle-perftools-dev \
+        libmpc-dev \
+        libmpfr-dev \
+        libgmp-dev \
+        libsystemc \
+        libsystemc-dev \
+        libtool \
+        numactl \
+        openssh-client \
+        perl \
+	procps \
+        python3 \
+        texinfo \
+        vim \
+        vim-gitgutter \
+        wget \
+        xsltproc \
+        z3 \
+        zlib1g \
+        zlib1g-dev && \
+    apt-get clean && \
+
     mkdir -p $INSTPATH $ROOTSRCS
 
 #
@@ -90,7 +136,7 @@ WORKDIR $HOMEDIR
 # Fetch the binutils sources
 # Since we are working on them, ensure they are repulled if necessary
 #
-ADD https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/128up version.json
+ADD https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/dev/128upcr version.json
 RUN git clone --origin origin https://github.com/fpetrot/riscv-binutils.git
 #
 # Configure them so as to run in 128-bit, local install path
@@ -99,7 +145,7 @@ RUN git clone --origin origin https://github.com/fpetrot/riscv-binutils.git
 # To be fixed at some point, live with it for now
 #
 RUN cd riscv-binutils && \
-    git checkout 128up && \
+    git checkout dev/128upcr && \
     mkdir build-128up && \
     cd build-128up && \
     CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$HOMEDIR/sandbox \
@@ -130,7 +176,7 @@ RUN cd riscv-gcc && \
     git checkout dev/128 && \
     mkdir build && \
     cd build && \
-    CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$HOMEDIR/sandbox \
+    CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$HOMEDIR/sandbox \
                                                    --target=riscv128-unknown-elf \
                                                    --enable-languages=c \
                                                    --enable-multilib \
@@ -155,12 +201,33 @@ ENV PATH="/home/fred/sandbox/bin:$PATH"
 RUN git clone https://github.com/fpetrot/newlib.git
 
 RUN cd newlib && \
+    git checkout dev/128upcr && \
     mkdir build && \
     cd build && \
-    ../configure --prefix=$HOMEDIR/sandbox --target=riscv128-unknown-elf
-
+    CFLAGS="-O0 -g" CXXFLAGS="-march=rv128ima -mabi=llp128" CFLAGS_FOR_TARGET="-mcmodel=medany" \
+    ../configure --prefix=$HOMEDIR/sandbox \
+    --target=riscv128-unknown-elf \
+    --enable-newlib-reent-small \
+    --enable-newlib-nano-malloc \
+    --enable-newlib-global-atexit \
+    --enable-lite-exit \
+    --enable-multilib \
+    --disable-newlib-fvwrite-in-streamio \
+    --disable-newlib-fseek-optimization \
+    --disable-newlib-wide-orient \
+    --disable-newlib-unbuf-stream-opt \
+    --disable-newlib-supplied-syscalls \
+    --disable-nls \
+    --disable-newlib-multithread \
+    --with-arch=rv128ima \
+    --with-abi=llp128 \
+    --enable-newlib-io-long-long
+    
 RUN cd newlib/build && \
     make -j $((1 + $(nproc) / 2)) && make install
+
+RUN cd newlib && \
+    git remote add upstream https://sourceware.org/git/newlib-cygwin.git 
 
 USER root
 RUN apt-get install -y --no-install-recommends --no-install-suggests \
@@ -197,6 +264,52 @@ RUN cd qemu-riscv128 && \
 #
 RUN git clone --origin origin https://github.com/fpetrot/128-test.git
 
+RUN cd 128-test && \
+    git checkout dev/128tests
+#
+# fetch the openhwgroup cva6 core updated to 128-bit
+#
+RUN git clone https://github.com/fpetrot/cva6.git
+
+
+#
+# fetch riscvbarelib os
+#
+RUN git clone https://github.com/cfuguet/riscvbarelib.git && \
+    cd riscvbarelib/ && \
+    git checkout dev/128 && \
+    make BSP=$PWD/bsp/ariane_testharness O=../rv128_ariane_testharness \
+    XLEN=128 RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 BSP_FPU=1
+
+#
+# fetch riscvbareapps
+#
+RUN git clone https://github.com/cfuguet/riscvbareapps.git 
+
+
+#
+# Configure for 128-bit, local install path
+#
+RUN cd cva6 && \
+    git checkout cva-128 && \
+    git config --global --add safe.directory /home/fred/cva6 && \
+    git submodule update --init --recursive
+    
+RUN cd cva6 && \
+    mkdir -p tools/toolchain/ && \
+    export RISCV=$HOMEDIR/cva6/tools/toolchain && \
+    INSTALL_DIR=$RISCV && \
+    cd util/toolchain-builder/ && \
+    bash get-toolchain.sh && \
+    bash build-toolchain.sh $INSTALL_DIR
+
+RUN cd cva6 && \
+    export RISCV=$HOMEDIR/cav6/tools/toolchain && \
+    bash verif/regress/install-verilator.sh && \
+    cp -r tools/verilator* tools/verilator && \
+    bash verif/regress/install-spike.sh
+
+
 #
 # We unfortunately need to debug our stuff, so let us install gdb
 #
@@ -212,6 +325,7 @@ USER $USER
 RUN echo "set -o vi" >> $HOMEDIR/.bashrc
 RUN echo "export LESSCHARSET=utf-8" >> $HOMEDIR/.bashrc
 RUN echo "export PATH=\$HOME/sandbox/bin:\$PATH" >> $HOMEDIR/.bashrc
+RUN echo "export RISCV=\$HOME/cva6/tools/toolchain:\$PATH" >> $HOMEDIR/.bashrc
 RUN echo "source \$VIMRUNTIME/defaults.vim" >> $HOMEDIR/.vimrc
 RUN echo "map ; ." >> $HOMEDIR/.vimrc
 RUN echo "set mouse=" >> $HOMEDIR/.vimrc
