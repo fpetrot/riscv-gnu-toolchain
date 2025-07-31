@@ -54,11 +54,11 @@ This is not the recommended use of docker, but I find it pretty adapted to the n
 Structure of the container
 ==========================
 
-- [128-test](https://github.com/fpetrot/128-test.git) (*dev/128tests*) : a set of tests 
+- [128-test](https://github.com/fpetrot/128-test.git) (*dev/128*) : a set of tests 
 - [cva6](https://github.com/fpetrot/cva6.git) (*cva-128*) : a 128 bits version of the CVA6 RISC-V CPU
-- [newlib](https://github.com/fpetrot/newlib.git) (*dev/128upcr*) : a 128 bits version of the newlib libc (included in our compiler)
+- [newlib](https://github.com/fpetrot/newlib.git) (*dev/128*) : a 128 bits version of the newlib libc (included in our compiler)
 - [qemu-riscv128](https://github.com/fpetrot/qemu-riscv128.git) (*master*) : a 128 bits version of qemu
-- [riscv-binutils](https://github.com/fpetrot/qemu-riscv128.git) (*dev/128upcr*) : a 128 bits version of binutils 
+- [riscv-binutils](https://github.com/fpetrot/qemu-riscv128.git) (*dev/128*) : a 128 bits version of binutils 
 - [riscv-gcc](https://github.com/fpetrot/riscv-gcc.git) (*dev/128*) : a 128 bits vesrions of gcc
 - [riscvbareapps](https://github.com/cfuguet/riscvbareapps.git) (*main*) : some examples to use riscvbarelib
 - [riscvbarelib](https://github.com/cfuguet/riscvbarelib.git) (*dev/128*) : a small footprint OS to use with newlib 

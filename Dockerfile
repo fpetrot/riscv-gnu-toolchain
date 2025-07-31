@@ -136,7 +136,7 @@ WORKDIR $HOMEDIR
 # Fetch the binutils sources
 # Since we are working on them, ensure they are repulled if necessary
 #
-ADD https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/dev/128upcr version.json
+ADD https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/dev/128 version.json
 RUN git clone --origin origin https://github.com/fpetrot/riscv-binutils.git
 #
 # Configure them so as to run in 128-bit, local install path
@@ -145,7 +145,7 @@ RUN git clone --origin origin https://github.com/fpetrot/riscv-binutils.git
 # To be fixed at some point, live with it for now
 #
 RUN cd riscv-binutils && \
-    git checkout dev/128upcr && \
+    git checkout dev/128 && \
     mkdir build-128up && \
     cd build-128up && \
     CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$HOMEDIR/sandbox \
@@ -201,7 +201,7 @@ ENV PATH="/home/fred/sandbox/bin:$PATH"
 RUN git clone https://github.com/fpetrot/newlib.git
 
 RUN cd newlib && \
-    git checkout dev/128upcr && \
+    git checkout dev/128 && \
     mkdir build && \
     cd build && \
     CFLAGS="-O0 -g" CXXFLAGS="-march=rv128ima -mabi=llp128" CFLAGS_FOR_TARGET="-mcmodel=medany" \
@@ -265,7 +265,7 @@ RUN cd qemu-riscv128 && \
 RUN git clone --origin origin https://github.com/fpetrot/128-test.git
 
 RUN cd 128-test && \
-    git checkout dev/128tests
+    git checkout dev/128
 #
 # fetch the openhwgroup cva6 core updated to 128-bit
 #
