@@ -72,6 +72,18 @@ RUN apt-get update && \
     mkdir -p $INSTPATH $ROOTSRCS
 
 #
+# Qemu needs some specific stuff
+#
+RUN apt-get install -y --no-install-recommends --no-install-suggests \
+            python3-minimal python3-venv meson ninja-build pkgconf libglib2.0-dev \
+            libpixman-1-dev libcapstone-dev libfdt-dev
+#
+# We unfortunately need to debug our stuff, so let us install gdb
+#
+RUN apt-get install -y --no-install-recommends --no-install-suggests \
+            gdb
+
+#
 # According to binutils README-maintainer-mode, we need
 # autoconf 2.69
 # automake 1.15.1
@@ -227,11 +239,6 @@ RUN cd newlib/build && \
 RUN cd newlib && \
     git remote add upstream https://sourceware.org/git/newlib-cygwin.git 
 
-USER root
-RUN apt-get install -y --no-install-recommends --no-install-suggests \
-            python3-minimal python3-venv meson ninja-build pkgconf libglib2.0-dev \
-            libpixman-1-dev libcapstone-dev libfdt-dev
-USER $USER
 #
 # Fetch QEMU
 #
@@ -309,17 +316,10 @@ RUN cd cva6 && \
 
 
 #
-# We unfortunately need to debug our stuff, so let us install gdb
-#
-USER root
-RUN apt-get install -y --no-install-recommends --no-install-suggests \
-            gdb
-#
 # Let's have some simple configuration, in particular autoindent that follows
 # GNU's or QEMU coding standards
 #
 # escape=\
-USER $USER
 RUN echo "set -o vi" >> $HOMEDIR/.bashrc
 RUN echo "export LESSCHARSET=utf-8" >> $HOMEDIR/.bashrc
 RUN echo "export PATH=\$HOME/sandbox/bin:\$PATH" >> $HOMEDIR/.bashrc
