@@ -24,13 +24,13 @@ RUN apt-get update && \
         autoconf \
         automake \
         autotools-dev \
+        autogen \
         babeltrace \
         bc \
         bison \
         build-essential \
         ca-certificates \
         ccache \
-        # clang \
         cmake \
         curl \
         device-tree-compiler \
@@ -38,7 +38,6 @@ RUN apt-get update && \
         file \
         flex \
         gawk \
-        # gdb \
         gperf \
         git \
         gtkwave \
@@ -59,7 +58,7 @@ RUN apt-get update && \
         numactl \
         openssh-client \
         perl \
-	procps \
+        procps \
         python3 \
         texinfo \
         vim \
@@ -70,7 +69,6 @@ RUN apt-get update && \
         zlib1g \
         zlib1g-dev && \
     apt-get clean && \
-
     mkdir -p $INSTPATH $ROOTSRCS
 
 #
@@ -284,7 +282,7 @@ RUN git clone https://github.com/cfuguet/riscvbarelib.git && \
 #
 # fetch riscvbareapps
 #
-RUN git clone https://github.com/cfuguet/riscvbareapps.git 
+RUN git clone https://github.com/cfuguet/riscvbareapps.git
 
 
 #
@@ -294,7 +292,7 @@ RUN cd cva6 && \
     git checkout dev/128 && \
     git config --global --add safe.directory /home/fred/cva6 && \
     git submodule update --init --recursive
-    
+
 RUN cd cva6 && \
     mkdir -p tools/toolchain/ && \
     export RISCV=$HOMEDIR/cva6/tools/toolchain && \
