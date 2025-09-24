@@ -120,7 +120,7 @@ RUN cd autoconf-2.69 && \
 #
 RUN useradd -ms /bin/bash $USER
 USER $USER
-ENV HOMEDIR /home/$USER
+ENV HOMEDIR=/home/$USER
 WORKDIR $HOMEDIR
 
 #
@@ -220,7 +220,7 @@ RUN cd newlib && \
     --with-arch=rv128ima \
     --with-abi=llp128 \
     --enable-newlib-io-long-long
-    
+
 RUN cd newlib/build && \
     make -j $((1 + $(nproc) / 2)) && make install
 
