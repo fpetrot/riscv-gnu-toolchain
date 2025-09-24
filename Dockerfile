@@ -242,7 +242,7 @@ RUN git clone --origin origin https://github.com/fpetrot/qemu-riscv128.git
 # Configure for 128-bit, local install path
 #
 RUN cd qemu-riscv128 && \
-    git checkout elf128 && \
+    git checkout dev/128 && \
     mkdir build-elf128 && \
     cd build-elf128 && \
     ../configure --prefix=$HOMEDIR/sandbox --target-list=riscv64-softmmu \
@@ -291,7 +291,7 @@ RUN git clone https://github.com/cfuguet/riscvbareapps.git
 # Configure for 128-bit, local install path
 #
 RUN cd cva6 && \
-    git checkout cva-128 && \
+    git checkout dev/128 && \
     git config --global --add safe.directory /home/fred/cva6 && \
     git submodule update --init --recursive
     
