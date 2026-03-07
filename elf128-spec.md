@@ -110,7 +110,7 @@ Notes:
 
 * We never used or even tested compressed objects or executables, so it is here only for completness,
 * It seems that the compressed header `ch_type` field must be the first one in the structure (which leads to padding in the elf64 case).
-  We followed the same road for elf128, even though it seems strange (putting it at the end would remove the need for padding),
+  We followed the same road for elf128, as most probably there will be arrays of this struct, that will then require aligment.
 * I don't quite understand (unless alignment is an issue for that structure) why the type of `ch_addralign` is the largest of the Data Model.
 
 ## ELF Symbol Table
