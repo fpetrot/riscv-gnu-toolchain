@@ -1,7 +1,7 @@
 128-bit RISC-V GNU Cross Development Environment and QEMU Cross Emulation
 =========================================================================
 
-This repo contains the necessary stuff to built a 128-bit RISC-V GNU Cross Development Environment and execute the resulting programs on QEMU.
+This repo contains the necessary stuff to built a 128-bit RISC-V GNU Cross Development Environment, execute the resulting programs on QEMU and a 128-bit CVA6 RTL design.
 It support, with bugs, the usual cross-development tools and allows to compile and test simple bare metal programs for now.
 
 This was a kind of a fork of https://github.com/riscv-collab/riscv-gnu-toolchain done in May/July 2022.
@@ -19,7 +19,6 @@ For `gcc`, available ABI options are llp128, llp128f, llp128d.
 
 -   soft floating point operations have erratic behaviour, support for 128-bit words is not done
 -   hard floating points moves (fmv) are currently seen as illegal by qemu (I believe I patched this but I am not sure anymore)
--   gdb somtimes crashs in case of memory accesses
 -   linux configuration is not supported
 -   musl configuration is not supported
 
