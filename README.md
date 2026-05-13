@@ -1,4 +1,4 @@
-128-bit RISC-V GNU Cross Development Environment and QEMU Cross Emulation
+128-bit RISC-V GNU Cross Development Environment, QEMU Cross Emulation, and Hardware support in CVA6
 =========================================================================
 
 This repo contains the necessary stuff to built a 128-bit RISC-V GNU Cross Development Environment, execute the resulting programs on QEMU and a 128-bit CVA6 RTL design.
