@@ -5,7 +5,7 @@ The sources on which this document is based are Linux `/usr/include/elf.h`, QEMU
 
 ## Elf128 C Language Data Model Proposal
 
-For an explanation about the C Language Data Model and its consequences, see [64-bit and Data Size Neutrality](https://unix.org/whitepapers/64bit.html).
+For an explanation about the C Language Data Model and its consequences, see [64-bit and Data Size Neutrality](https://www.usenix.org/legacy/publications/login/standards/10.data.html).
 
 The RISC-V specification defines the ILP32[fd] and LP64[fd] ABIs for `xlen=32` and `xlen=64` respectively.
 To be consistant with these choices, we propose to use an LLP128[fd] when `xlen=128` for which `long long`, `size_t` and `ptrdiff_t` variables are on 128-bit.
