@@ -324,16 +324,17 @@ RUN echo "set -o vi" >> $HOMEDIR/.bashrc
 RUN echo "export LESSCHARSET=utf-8" >> $HOMEDIR/.bashrc
 RUN echo "export PATH=\$HOME/sandbox/bin:\$PATH" >> $HOMEDIR/.bashrc
 RUN echo "export RISCV=\$HOME/cva6/tools/toolchain:\$PATH" >> $HOMEDIR/.bashrc
-RUN echo "source \$VIMRUNTIME/defaults.vim" >> $HOMEDIR/.vimrc
-RUN echo "map ; ." >> $HOMEDIR/.vimrc
-RUN echo "set mouse=" >> $HOMEDIR/.vimrc
-RUN echo "function! GnuIndent()" >> $HOMEDIR/.vimrc
-RUN echo "setlocal cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1" >> $HOMEDIR/.vimrc
-RUN echo "setlocal shiftwidth=2" >> $HOMEDIR/.vimrc
-RUN echo "setlocal tabstop=8" >> $HOMEDIR/.vimrc
-RUN echo "endfunction" >> $HOMEDIR/.vimrc
-RUN echo "function! QemuIndent()" >> $HOMEDIR/.vimrc
-RUN echo "setlocal shiftwidth=4" >> $HOMEDIR/.vimrc
-RUN echo "setlocal expandtab" >> $HOMEDIR/.vimrc
-RUN echo "endfunction" >> $HOMEDIR/.vimrc
-RUN echo "au BufRead */qemu-*/*.{c,cpp,h} call QemuIndent()" >> $HOMEDIR/.vimrc
+
+RUN echo "source \$VIMRUNTIME/defaults.vim" >> $HOMEDIR/.vimrc && \
+    echo "map ; ." >> $HOMEDIR/.vimrc && \
+    echo "set mouse=" >> $HOMEDIR/.vimrc && \
+    echo "function! GnuIndent()" >> $HOMEDIR/.vimrc && \
+    echo "setlocal cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1" >> $HOMEDIR/.vimrc && \
+    echo "setlocal shiftwidth=2" >> $HOMEDIR/.vimrc && \
+    echo "setlocal tabstop=8" >> $HOMEDIR/.vimrc && \
+    echo "endfunction" >> $HOMEDIR/.vimrc && \
+    echo "function! QemuIndent()" >> $HOMEDIR/.vimrc && \
+    echo "setlocal shiftwidth=4" >> $HOMEDIR/.vimrc && \
+    echo "setlocal expandtab" >> $HOMEDIR/.vimrc && \
+    echo "endfunction" >> $HOMEDIR/.vimrc && \
+    echo "au BufRead */qemu-*/*.{c,cpp,h} call QemuIndent()" >> $HOMEDIR/.vimrc
