@@ -1,0 +1,9 @@
+services:
+  riscv128:
+    build: .
+
+    volumes:
+      # Source directory which will contain all code on the HOST
+      - .:/home/fred/code/
+      # Source directory which will contain built artifacts on the HOST
+      - ./sandbox/:/home/fred/sandbox/
