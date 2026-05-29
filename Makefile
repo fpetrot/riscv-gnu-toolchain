@@ -1,5 +1,5 @@
-HOMEDIR=/home/$(USER)
 NPROC=$(shell nproc)
+SANDBOX=./sandbox
 
 .PHONY: binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 build-riscvbarelib setup-cva6 create-container dk
 
@@ -31,7 +31,7 @@ setup-binutils: riscv-binutils
 		mkdir build-128up -p && \
 		cd build-128up && \
 		git checkout dev/128 && \
-		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(HOMEDIR)/sandbox \
+		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(SANDBOX) \
 													   --enable-maintainer-mode \
 													   --target=riscv128-unknown-elf
 
@@ -65,7 +65,7 @@ setup-gcc: riscv-gcc
 		git checkout dev/128 && \
 		mkdir build -p && \
 		cd build && \
-		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(HOMEDIR)/sandbox \
+		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
 																						   --target=riscv128-unknown-elf \
 																						   --enable-languages=c \
 																						   --enable-multilib \
@@ -100,7 +100,7 @@ setup-newlib: newlib
 		mkdir build -p && \
 		cd build && \
 		CFLAGS="-O0 -g" CXXFLAGS="-march=rv128ima -mabi=llp128" CFLAGS_FOR_TARGET="-mcmodel=medany" \
-		../configure --prefix=$(HOMEDIR)/sandbox \
+		../configure --prefix=$(SANDBOX) \
 		--target=riscv128-unknown-elf \
 		--enable-newlib-reent-small \
 		--enable-newlib-nano-malloc \
@@ -147,7 +147,7 @@ setup-qemu-riscv128: qemu-riscv128
 		git checkout dev/128 && \
 		mkdir build-elf128 -p && \
 		cd build-elf128 && \
-		../configure --prefix=$(HOMEDIR)/sandbox --target-list=riscv64-softmmu \
+		../configure --prefix=$(SANDBOX) --target-list=riscv64-softmmu \
 					 --enable-debug --enable-capstone
 
 qemu: qemu-riscv128
@@ -179,7 +179,6 @@ setup-cva6: cva6
 	cd cva6 && \
 		NUM_JOBS=$(NPROC) && \
 		git checkout dev/128 && \
-		git config --global --add safe.directory /home/$(USER)/cva6 && \
 		git submodule update --init --recursive
 
 
@@ -187,7 +186,7 @@ build-cva6:
 	cd cva6 && \
 		NUM_JOBS=$(NPROC) && \
 		mkdir -p tools/toolchain/ && \
-		export RISCV=$(HOMEDIR)/cva6/tools/toolchain && \
+		export RISCV=$(pwd)/../cva6/tools/toolchain && \
 		INSTALL_DIR=$$RISCV && \
 		cd util/toolchain-builder/ && \
 		bash get-toolchain.sh && \
@@ -195,7 +194,7 @@ build-cva6:
 
 	cd cva6 && \
 		NUM_JOBS=$(NPROC) && \
-		export RISCV=$(HOMEDIR)/cav6/tools/toolchain && \
+		export RISCV=$(pwd)/../cav6/tools/toolchain && \
 		bash verif/regress/install-verilator.sh && \
 		cp -rf tools/verilator-* tools/verilator && \
 		bash verif/regress/install-spike.sh
@@ -210,8 +209,9 @@ riscvbarelib:
 		git checkout dev/128
 
 build-riscvbarelib: riscvbarelib
-	make BSP=$$PWD/bsp/ariane_testharness O=../rv128_ariane_testharness \
-		XLEN=128 RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 BSP_FPU=1
+	cd riscvbarelib/ && \
+		make BSP=$$PWD/bsp/ariane_testharness O=../rv128_ariane_testharness \
+			XLEN=128 RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 BSP_FPU=1
 
 riscvbareapps:
 	#
@@ -219,15 +219,15 @@ riscvbareapps:
 	#
 	git clone https://github.com/cfuguet/riscvbareapps.git
 
-sandbox:
-	mkdir sandbox -p
+$(SANDBOX):
+	mkdir $(SANDBOX) -p
 
-create-container: sandbox
+create-container: $(SANDBOX)
 	USER_ID=$(shell id -u) \
 		GROUP_ID=$(shell id -g) \
 		docker compose build
 
-dk: sandbox
+dk: $(SANDBOX)
 	USER_ID=$(shell id -u) \
 		GROUP_ID=$(shell id -g) \
 		docker compose run --rm riscv128

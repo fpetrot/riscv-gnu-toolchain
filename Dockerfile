@@ -125,4 +125,6 @@ RUN cd autoconf-2.69 && \
     ./configure --prefix=$INSTPATH && \
     make -j $(nproc) && make install
 
+# Built binaries will be here
+ENV PATH="/work/sandbox/bin:$PATH"
 WORKDIR /work

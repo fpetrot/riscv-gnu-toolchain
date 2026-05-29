@@ -6,6 +6,7 @@ riscv-binutils/
 riscv-gcc/
 riscvbareapps/
 riscvbarelib/
+rv128_ariane_testharness/
 sandbox/
 testrun.log
 testrun.sum
