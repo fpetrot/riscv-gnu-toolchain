@@ -1,7 +1,7 @@
 HOMEDIR=/home/$(USER)
 NPROC=$(shell nproc)
 
-.PHONY: binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 build-riscvbarelib setup-cva6
+.PHONY: binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 build-riscvbarelib setup-cva6 create-container dk
 
 setup: version.json setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 128-test setup-cva6 riscvbarelib riscvbareapps
 build: binutils gcc build-newlib qemu build-cva6 build-riscvbarelib
@@ -219,3 +219,15 @@ riscvbareapps:
 	#
 	git clone https://github.com/cfuguet/riscvbareapps.git
 
+sandbox:
+	mkdir sandbox -p
+
+create-container: sandbox
+	USER_ID=$(shell id -u) \
+		GROUP_ID=$(shell id -g) \
+		docker compose build
+
+dk: sandbox
+	USER_ID=$(shell id -u) \
+		GROUP_ID=$(shell id -g) \
+		docker compose run --rm riscv128

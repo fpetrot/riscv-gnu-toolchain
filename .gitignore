@@ -7,4 +7,6 @@ riscv-gcc/
 riscvbareapps/
 riscvbarelib/
 sandbox/
+testrun.log
+testrun.sum
 version.json

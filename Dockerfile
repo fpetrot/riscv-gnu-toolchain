@@ -13,7 +13,6 @@ LABEL Description="Image to (cross-)build the binutils in maintainer mode and gc
 # and do the rest as user fred
 ENV ROOTSRCS=/root/src
 ENV INSTPATH=/opt/tools
-ENV USER=fred
 
 #
 # Dependencies
@@ -126,14 +125,7 @@ RUN cd autoconf-2.69 && \
     ./configure --prefix=$INSTPATH && \
     make -j $(nproc) && make install
 
-#
-# Create a user so that development and installation
-# takes place in a non-root environment
-#
-RUN useradd -ms /bin/bash $USER
-USER $USER
-ENV HOMEDIR=/home/$USER
-WORKDIR $HOMEDIR
+WORKDIR /work
 
 #
 # Give access for external ssh key so that the docker image can be shared
