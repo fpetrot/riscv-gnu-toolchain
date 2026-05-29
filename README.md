@@ -56,7 +56,7 @@ Structure of the container
 - [cva6](https://github.com/fpetrot/cva6.git) (*dev/128*) : a 128-bit version of the CVA6 RISC-V CPU
 - [newlib](https://github.com/fpetrot/newlib.git) (*dev/128*) : a 128-bit version of the newlib libc (included in our compiler)
 - [qemu-riscv128](https://github.com/fpetrot/qemu-riscv128.git) (*dev/128*) : a version of qemu supporting the elf128 format
-- [riscv-binutils](https://github.com/fpetrot/qemu-riscv128.git) (*dev/128*) : a 128-bit version of binutils 
+- [riscv-binutils](https://github.com/fpetrot/riscv-binutils) (*dev/128*) : a 128-bit version of binutils 
 - [riscv-gcc](https://github.com/fpetrot/riscv-gcc.git) (*dev/128*) : a 128-bit version of gcc
 - [riscvbareapps](https://github.com/cfuguet/riscvbareapps.git) (*main*) : some examples to use riscvbarelib
 - [riscvbarelib](https://github.com/cfuguet/riscvbarelib.git) (*dev/128*) : a small footprint syscall library to use with newlib 
