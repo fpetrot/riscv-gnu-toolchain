@@ -1,9 +1,9 @@
 NPROC=$(shell nproc)
-SANDBOX=./sandbox
+SANDBOX=$(shell pwd)/sandbox
 
 .PHONY: binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 build-riscvbarelib setup-cva6 create-container dk
 
-setup: version.json setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 128-test setup-cva6 riscvbarelib riscvbareapps
+setup: version.json setup-binutils setup-gcc setup-newlib setup-qemu-riscv128 128-test cva6 riscvbarelib riscvbareapps
 build: binutils gcc build-newlib qemu build-cva6 build-riscvbarelib
 
 version.json:
@@ -18,6 +18,7 @@ riscv-binutils:
 	# Add upstream repo for rebasing regularly
 	#
 	cd riscv-binutils && \
+		git checkout dev/128 && \
 		git remote add upstream https://sourceware.org/git/binutils-gdb.git
 
 setup-binutils: riscv-binutils
@@ -30,7 +31,6 @@ setup-binutils: riscv-binutils
 	cd riscv-binutils && \
 		mkdir build-128up -p && \
 		cd build-128up && \
-		git checkout dev/128 && \
 		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(SANDBOX) \
 													   --enable-maintainer-mode \
 													   --target=riscv128-unknown-elf
@@ -51,6 +51,7 @@ riscv-gcc:
 	git clone --origin origin https://github.com/fpetrot/riscv-gcc.git
 
 	cd riscv-gcc && \
+		git checkout dev/128 && \
 		git remote add upstream https://gcc.gnu.org/git/gcc.git
 
 setup-gcc: riscv-gcc
@@ -62,7 +63,6 @@ setup-gcc: riscv-gcc
 	# Still many cleanups to do, though.
 	#
 	cd riscv-gcc && \
-		git checkout dev/128 && \
 		mkdir build -p && \
 		cd build && \
 		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
@@ -87,6 +87,7 @@ newlib:
 	#
 	git clone https://github.com/fpetrot/newlib.git
 	cd newlib && \
+		git checkout dev/128 && \
 		git remote add upstream https://sourceware.org/git/newlib-cygwin.git 
 
 setup-newlib: newlib
@@ -96,7 +97,6 @@ setup-newlib: newlib
 	# This is to be compiled using our newly created gcc
 	#
 	cd newlib && \
-		git checkout dev/128 && \
 		mkdir build -p && \
 		cd build && \
 		CFLAGS="-O0 -g" CXXFLAGS="-march=rv128ima -mabi=llp128" CFLAGS_FOR_TARGET="-mcmodel=medany" \
@@ -137,6 +137,7 @@ qemu-riscv128:
 	# Add upstream repo for rebasing regularly
 	#
 	cd qemu-riscv128 && \
+		git checkout dev/128 && \
 		git remote add upstream https://github.com/qemu/qemu
 
 setup-qemu-riscv128: qemu-riscv128
@@ -144,13 +145,12 @@ setup-qemu-riscv128: qemu-riscv128
 	# Configure for 128-bit, local install path
 	#
 	cd qemu-riscv128 && \
-		git checkout dev/128 && \
 		mkdir build-elf128 -p && \
 		cd build-elf128 && \
 		../configure --prefix=$(SANDBOX) --target-list=riscv64-softmmu \
 					 --enable-debug --enable-capstone
 
-qemu: qemu-riscv128
+qemu:
 	#
 	# Compile it
 	#
@@ -172,17 +172,15 @@ cva6:
 	#
 	git clone https://github.com/fpetrot/cva6.git
 
-setup-cva6: cva6
-	#
-	# Configure for 128-bit, local install path
-	#
 	cd cva6 && \
-		NUM_JOBS=$(NPROC) && \
 		git checkout dev/128 && \
 		git submodule update --init --recursive
 
 
 build-cva6:
+	#
+	# Configure for 128-bit, local install path
+	#
 	cd cva6 && \
 		NUM_JOBS=$(NPROC) && \
 		mkdir -p tools/toolchain/ && \
@@ -222,7 +220,7 @@ riscvbareapps:
 $(SANDBOX):
 	mkdir $(SANDBOX) -p
 
-create-container: $(SANDBOX)
+create-image: $(SANDBOX)
 	USER_ID=$(shell id -u) \
 		GROUP_ID=$(shell id -g) \
 		docker compose build
