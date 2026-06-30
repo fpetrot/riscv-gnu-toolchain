@@ -7,7 +7,10 @@ riscv-gcc/
 riscvbareapps/
 riscvbarelib/
 rv128_ariane_testharness/
+rv64_ariane_testharness/
 sandbox/
 testrun.log
 testrun.sum
 version.json
+before.log
+after.log

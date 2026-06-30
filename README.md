@@ -44,7 +44,6 @@ $ make dk
 # Now inside the docker container
 $ make help
 # To setup and build the whole toolchain
-$ make setup
 $ make build
 ```
 

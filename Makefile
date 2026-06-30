@@ -1,4 +1,7 @@
 SANDBOX=$(shell pwd)/sandbox
+XLEN=128
+MARCH=rv$(XLEN)ima
+MABI=llp$(XLEN)
 
 .PHONY: help binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu build-riscvbarelib setup-cva6 create-container dk
 
@@ -6,7 +9,8 @@ help:
 	@awk 'BEGIN {FS = ":.*##!"; printf "Usage: make \033[32m<commande>\033[0m \
 	\nRules per \033[36mcategories :\n"} \
 	/^[a-zA-Z0-9_-]+:.*##!/ { printf "  \033[32m%-20s\033[0m %s\n", $$1, $$2 } \
-	/^##@/ { printf "\n\033[36m%s\033[0m\n", substr($$0, 5) }' $(MAKEFILE_LIST)
+	/^##@/ { printf "\n\033[36m%s\033[0m\n", substr($$0, 5) } \
+	END { printf "\n\033[35mXLEN=64\033[0m can be used on each commands to build the same tool in 64bits.\n" }' $(MAKEFILE_LIST)
 
 ##@ General
 
@@ -21,11 +25,11 @@ build: version.json ##! Fetch, configure and compile every components.
 
 clean: ##! Cleanup everything.
 	rm $(SANDBOX) -rf
-	rm riscv-binutils/build-128up -rf
-	rm riscv-gcc/build -rf
-	rm newlib/build -rf
-	rm qemu-riscv128/build-elf128 -rf
-	rm rv128_ariane_testharness -rf
+	rm riscv-binutils/build-$(XLEN) -rf
+	rm riscv-gcc/build-$(XLEN) -rf
+	rm newlib/build-$(XLEN) -rf
+	rm qemu-riscv128/build -rf
+	rm rv$(XLEN)_ariane_testharness -rf
 	$(MAKE) -C 128-test clean
 
 version.json:
@@ -47,14 +51,14 @@ setup-binutils: riscv-binutils ##! Configure binutils compilation.
 	@# To be fixed at some point, live with it for now
 	@#
 	cd riscv-binutils && \
-		mkdir build-128up -p && \
-		cd build-128up && \
+		mkdir build-$(XLEN) -p && \
+		cd build-$(XLEN) && \
 		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(SANDBOX) \
 													   --enable-maintainer-mode \
-													   --target=riscv128-unknown-elf
+													   --target=riscv$(XLEN)-unknown-elf
 
 binutils: ##! Compile binutils.
-	$(MAKE) -C riscv-binutils/build-128up -j $(NPROC) && $(MAKE) -C riscv-binutils/build-128up install
+	$(MAKE) -C riscv-binutils/build-$(XLEN) && $(MAKE) -C riscv-binutils/build-$(XLEN) install
 
 ##@ GCC
 
@@ -72,10 +76,10 @@ setup-gcc: riscv-gcc ##! Configure gcc compilation.
 	@# Still many cleanups to do, though.
 	@#
 	cd riscv-gcc && \
-		mkdir build -p && \
-		cd build && \
+		mkdir build-$(XLEN) -p && \
+		cd build-$(XLEN) && \
 		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
-																						   --target=riscv128-unknown-elf \
+																						   --target=riscv$(XLEN)-unknown-elf \
 																						   --enable-languages=c \
 																						   --enable-multilib \
 																						   --with-cmodel=medany \
@@ -83,7 +87,15 @@ setup-gcc: riscv-gcc ##! Configure gcc compilation.
 																						   --disable-nls
 
 gcc: riscv-gcc ##! Compile gcc.
-	$(MAKE) -C riscv-gcc/build && $(MAKE) -C riscv-gcc/build install
+	$(MAKE) -C riscv-gcc/build-$(XLEN) && $(MAKE) -C riscv-gcc/build-$(XLEN) install
+
+check-gcc: ##! Run the riscv gcc testsuite in QEMU simulator.
+	$(MAKE) -C riscv-gcc/build-$(XLEN) check-gcc -k RUNTESTFLAGS="--target_board=riscv-sim riscv.exp"
+
+compare-gcc: ##! Compare gcc testsuite between upstream 64bits and patched 128bits. This require a 64bits toolchain built using XLEN=64 on the gcc upstream/master branch.
+	$(MAKE) check-gcc XLEN=64 > before.log
+	$(MAKE) check-gcc > after.log
+	./riscv-gcc/contrib/compare_tests before.log after.log
 
 ##@ Newlib
 
@@ -98,9 +110,9 @@ setup-newlib: newlib ##! Configure newlib compilation.
 	@# This is to be compiled using our newly created gcc
 	@#
 	cd newlib && \
-		mkdir build -p && \
-		cd build && \
-		CFLAGS="-O0 -g" CXXFLAGS="-march=rv128ima -mabi=llp128" CFLAGS_FOR_TARGET="-mcmodel=medany" \
+		mkdir build-$(XLEN) -p && \
+		cd build-$(XLEN) && \
+		CFLAGS="-O0 -g" CXXFLAGS="-march=$(MARCH) -mabi=$(MABI)" CFLAGS_FOR_TARGET="-mcmodel=medany" \
 		../configure --prefix=$(SANDBOX) \
 					 --target=riscv128-unknown-elf \
 					 --enable-newlib-reent-small \
@@ -115,8 +127,8 @@ setup-newlib: newlib ##! Configure newlib compilation.
 					 --disable-newlib-supplied-syscalls \
 					 --disable-nls \
 					 --disable-newlib-multithread \
-					 --with-arch=rv128ima \
-					 --with-abi=llp128 \
+					 --with-arch=$(MARCH) \
+					 --with-abi=$(MABI) \
 					 --enable-newlib-io-long-long
 
 
@@ -125,7 +137,7 @@ build-newlib: newlib ##! Compile newlib.
 	@# Again many warning, easily explainable because we are really just trying to
 	@# compile the library and have it kinda work, many things to do still
 	@#
-	$(MAKE) -C newlib/build && $(MAKE) -C newlib/build install
+	$(MAKE) -C newlib/build-$(XLEN) && $(MAKE) -C newlib/build-$(XLEN) install
 
 ##@ QEMU
 
@@ -140,13 +152,13 @@ setup-qemu: qemu-riscv128 ##! Configure qemu compilation.
 	@# Configure for 128-bit, local install path
 	@#
 	cd qemu-riscv128 && \
-		mkdir build-elf128 -p && \
-		cd build-elf128 && \
+		mkdir build -p && \
+		cd build && \
 		../configure --prefix=$(SANDBOX) --target-list=riscv64-softmmu \
 					 --enable-debug --enable-capstone
 
 qemu: ##! Compile qemu.
-	cd qemu-riscv128/build-elf128 && \
+	cd qemu-riscv128/build && \
 		ninja && ninja install
 
 ##@ Tests
@@ -163,8 +175,8 @@ riscvbarelib: ##! Fetch riscvbarelib os sources.
 	git clone -b dev/128 https://github.com/cfuguet/riscvbarelib.git
 
 build-riscvbarelib: riscvbarelib ##! Compile riscvbarelib.
-	$(MAKE) -C riscvbarelib BSP=bsp/ariane_testharness O=../rv128_ariane_testharness \
-			XLEN=128 RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 BSP_FPU=1
+	$(MAKE) -C riscvbarelib BSP=bsp/ariane_testharness O=../rv$(XLEN)_ariane_testharness \
+			XLEN=$(XLEN) RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 QEMU=1
 
 riscvbareapps: ##! Fetch riscvbareapps examples.
 	git clone https://github.com/cfuguet/riscvbareapps.git
