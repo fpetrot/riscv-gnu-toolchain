@@ -1,13 +1,12 @@
 128-test/
 cva6/
 newlib/
-qemu-riscv128/
+qemu-riscv/
 riscv-binutils/
 riscv-gcc/
 riscvbareapps/
 riscvbarelib/
-rv128_ariane_testharness/
-rv64_ariane_testharness/
+rv*_ariane_testharness/
 sandbox/
 testrun.log
 testrun.sum

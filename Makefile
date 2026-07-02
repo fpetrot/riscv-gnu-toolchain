@@ -2,15 +2,18 @@ SANDBOX=$(shell pwd)/sandbox
 XLEN=128
 MARCH=rv$(XLEN)ima
 MABI=llp$(XLEN)
+CHECK=check
 
-.PHONY: help binutils gcc build-newlib qemu build-cva6 setup build setup-binutils setup-gcc setup-newlib setup-qemu build-riscvbarelib setup-cva6 create-container dk
+.PHONY: help binutils gcc build-newlib qemu build-cva6 build setup-binutils check-binutils compare-binutils setup-gcc check-gcc compare-gcc setup-newlib setup-qemu build-riscvbarelib setup-cva6 create-container dk
 
 help:
 	@awk 'BEGIN {FS = ":.*##!"; printf "Usage: make \033[32m<commande>\033[0m \
 	\nRules per \033[36mcategories :\n"} \
 	/^[a-zA-Z0-9_-]+:.*##!/ { printf "  \033[32m%-20s\033[0m %s\n", $$1, $$2 } \
 	/^##@/ { printf "\n\033[36m%s\033[0m\n", substr($$0, 5) } \
-	END { printf "\n\033[35mXLEN=64\033[0m can be used on each commands to build the same tool in 64bits.\n" }' $(MAKEFILE_LIST)
+	END { printf "\n\033[35mXLEN=64\033[0m can be used on each commands to build the same tool in 64bits, or in 32bits. \
+	\n\033[35mCHECK=check-xxx\033[0m can be used on check commands to test a specific testsuite (check-gcc, check-ld, ...). \
+	\n\nExample: \033[33mmake check-binutils XLEN=64 CHECK=check-ld -j$$(nproc)\033[0m\n\n" }' $(MAKEFILE_LIST)
 
 ##@ General
 
@@ -28,7 +31,7 @@ clean: ##! Cleanup everything.
 	rm riscv-binutils/build-$(XLEN) -rf
 	rm riscv-gcc/build-$(XLEN) -rf
 	rm newlib/build-$(XLEN) -rf
-	rm qemu-riscv128/build -rf
+	rm qemu-riscv/build -rf
 	rm rv$(XLEN)_ariane_testharness -rf
 	$(MAKE) -C 128-test clean
 
@@ -60,6 +63,14 @@ setup-binutils: riscv-binutils ##! Configure binutils compilation.
 binutils: ##! Compile binutils.
 	$(MAKE) -C riscv-binutils/build-$(XLEN) && $(MAKE) -C riscv-binutils/build-$(XLEN) install
 
+check-binutils: ##! Run the riscv binutils testsuite.
+	$(MAKE) -C riscv-binutils/build-$(XLEN) $(CHECK) -k
+
+compare-binutils: ##! Compare binutils testsuite between upstream 64bits and patched 128bits. This require a 64bits toolchain built using XLEN=64 on the binutils upstream/master branch.
+	$(MAKE) check-binutils XLEN=64 > before.log
+	$(MAKE) check-binutils > after.log
+	./riscv-gcc/contrib/compare_tests before.log after.log
+
 ##@ GCC
 
 riscv-gcc: ##! Fetch gcc sources and add upstream repo for rebasing regularly.
@@ -67,6 +78,17 @@ riscv-gcc: ##! Fetch gcc sources and add upstream repo for rebasing regularly.
 
 	cd riscv-gcc && \
 		git remote add upstream https://gcc.gnu.org/git/gcc.git
+
+# When targeting gcc 64 or 32bits, only build multilib for rv64 and not rv128, because the associated binutils don't support elf128
+# The generator arguments come from the file riscv-gcc/gcc/config/riscv/t-elf-multilib
+MULTILIB_LIST_32_64_BITS = --with-multilib-generator="rv32i-ilp32--c rv32im-ilp32--c rv32iac-ilp32-- rv32imac-ilp32-- rv32imafc-ilp32f-rv32imafdc- rv64imac-lp64-- rv64imafdc-lp64d--"
+ifeq ($(XLEN),32)
+MULTILIB_LIST = $(MULTILIB_LIST_32_64_BITS)
+else ifeq ($(XLEN),64)
+MULTILIB_LIST = $(MULTILIB_LIST_32_64_BITS)
+else
+MULTILIB_LIST =
+endif
 
 setup-gcc: riscv-gcc ##! Configure gcc compilation.
 	@#
@@ -78,10 +100,11 @@ setup-gcc: riscv-gcc ##! Configure gcc compilation.
 	cd riscv-gcc && \
 		mkdir build-$(XLEN) -p && \
 		cd build-$(XLEN) && \
-		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
+		CFLAGS="-O2 -g" CXXFLAGS="-O2 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
 																						   --target=riscv$(XLEN)-unknown-elf \
 																						   --enable-languages=c \
 																						   --enable-multilib \
+																						   $(MULTILIB_LIST) \
 																						   --with-cmodel=medany \
 																						   --disable-libssp \
 																						   --disable-nls
@@ -90,7 +113,7 @@ gcc: riscv-gcc ##! Compile gcc.
 	$(MAKE) -C riscv-gcc/build-$(XLEN) && $(MAKE) -C riscv-gcc/build-$(XLEN) install
 
 check-gcc: ##! Run the riscv gcc testsuite in QEMU simulator.
-	$(MAKE) -C riscv-gcc/build-$(XLEN) check-gcc -k RUNTESTFLAGS="--target_board=riscv-sim riscv.exp"
+	$(MAKE) -C riscv-gcc/build-$(XLEN) $(CHECK) -k RUNTESTFLAGS="--target_board=riscv-sim riscv.exp"
 
 compare-gcc: ##! Compare gcc testsuite between upstream 64bits and patched 128bits. This require a 64bits toolchain built using XLEN=64 on the gcc upstream/master branch.
 	$(MAKE) check-gcc XLEN=64 > before.log
@@ -112,9 +135,9 @@ setup-newlib: newlib ##! Configure newlib compilation.
 	cd newlib && \
 		mkdir build-$(XLEN) -p && \
 		cd build-$(XLEN) && \
-		CFLAGS="-O0 -g" CXXFLAGS="-march=$(MARCH) -mabi=$(MABI)" CFLAGS_FOR_TARGET="-mcmodel=medany" \
+		CFLAGS="-O2 -g" CXXFLAGS="-march=$(MARCH) -mabi=$(MABI)" CFLAGS_FOR_TARGET="-mcmodel=medany" \
 		../configure --prefix=$(SANDBOX) \
-					 --target=riscv128-unknown-elf \
+					 --target=riscv$(XLEN)-unknown-elf \
 					 --enable-newlib-reent-small \
 					 --enable-newlib-nano-malloc \
 					 --enable-newlib-global-atexit \
@@ -141,24 +164,24 @@ build-newlib: newlib ##! Compile newlib.
 
 ##@ QEMU
 
-qemu-riscv128: ##! Fetch qemu sources and add upstream repo for rebasing regularly.
-	git clone -b dev/128 --origin origin https://github.com/fpetrot/qemu-riscv128.git
+qemu-riscv: ##! Fetch qemu sources and add upstream repo for rebasing regularly.
+	git clone -b dev/128 --origin origin https://github.com/fpetrot/qemu-riscv128.git qemu-riscv
 
-	cd qemu-riscv128 && \
+	cd qemu-riscv && \
 		git remote add upstream https://github.com/qemu/qemu
 
-setup-qemu: qemu-riscv128 ##! Configure qemu compilation.
+setup-qemu: qemu-riscv ##! Configure qemu compilation.
 	@#
 	@# Configure for 128-bit, local install path
 	@#
-	cd qemu-riscv128 && \
+	cd qemu-riscv && \
 		mkdir build -p && \
 		cd build && \
 		../configure --prefix=$(SANDBOX) --target-list=riscv64-softmmu \
 					 --enable-debug --enable-capstone
 
 qemu: ##! Compile qemu.
-	cd qemu-riscv128/build && \
+	cd qemu-riscv/build && \
 		ninja && ninja install
 
 ##@ Tests
@@ -176,7 +199,7 @@ riscvbarelib: ##! Fetch riscvbarelib os sources.
 
 build-riscvbarelib: riscvbarelib ##! Compile riscvbarelib.
 	$(MAKE) -C riscvbarelib BSP=bsp/ariane_testharness O=../rv$(XLEN)_ariane_testharness \
-			XLEN=$(XLEN) RISCV_PREFIX=riscv128-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 QEMU=1
+			XLEN=$(XLEN) RISCV_PREFIX=riscv$(XLEN)-unknown-elf- BSP_ATOMIC=1 BSP_COMPRESSED=1 BSP_FLOAT=1 QEMU=1
 
 riscvbareapps: ##! Fetch riscvbareapps examples.
 	git clone https://github.com/cfuguet/riscvbareapps.git
