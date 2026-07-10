@@ -2,7 +2,16 @@ SANDBOX=$(shell pwd)/sandbox
 XLEN=128
 MARCH=rv$(XLEN)ima
 MABI=llp$(XLEN)
+# By default, test everything in the testsuites.
 CHECK=check
+
+# If REF is defined, we are building a reference toolchain. Add a suffix to build dirs.
+ifdef REF
+REF_SUFFIX=-ref
+endif
+
+# Suffix used in the name of build directories
+BUILD=$(XLEN)$(REF_SUFFIX)
 
 .PHONY: help binutils gcc build-newlib qemu build-cva6 build setup-binutils check-binutils compare-binutils setup-gcc check-gcc compare-gcc setup-newlib setup-qemu build-riscvbarelib setup-cva6 create-container dk
 
@@ -28,7 +37,7 @@ build: version.json ##! Fetch, configure and compile every components.
 
 clean: ##! Cleanup everything.
 	rm $(SANDBOX) -rf
-	rm riscv-binutils/build-$(XLEN) -rf
+	rm riscv-binutils/build-$(BUILD) -rf
 	rm riscv-gcc/build-$(XLEN) -rf
 	rm newlib/build-$(XLEN) -rf
 	rm qemu-riscv/build -rf
@@ -38,6 +47,10 @@ clean: ##! Cleanup everything.
 version.json:
 	curl https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/dev/128 > version.json
 
+# Build a custom specifier to print int128_t using printf
+printf_128.o: printf_128.c
+	$(CC) -c $^ -o $@
+
 ##@ Binutils
 
 riscv-binutils: ##! Fetch binutils sources and add upstream repo for rebasing regularly.
@@ -46,7 +59,7 @@ riscv-binutils: ##! Fetch binutils sources and add upstream repo for rebasing re
 	cd riscv-binutils && \
 		git remote add upstream https://sourceware.org/git/binutils-gdb.git
 
-setup-binutils: riscv-binutils ##! Configure binutils compilation.
+setup-binutils: riscv-binutils printf_128.o ##! Configure binutils compilation.
 	@#
 	@# Configure them so as to run in 128-bit, local install path
 	@# Removing the -O2 flags helps avoid run-time errors due to miss-use of the
@@ -54,17 +67,18 @@ setup-binutils: riscv-binutils ##! Configure binutils compilation.
 	@# To be fixed at some point, live with it for now
 	@#
 	cd riscv-binutils && \
-		mkdir build-$(XLEN) -p && \
-		cd build-$(XLEN) && \
-		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(SANDBOX) \
-													   --enable-maintainer-mode \
-													   --target=riscv$(XLEN)-unknown-elf
+		mkdir build-$(BUILD) -p && \
+		cd build-$(BUILD) && \
+		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" \
+		LDFLAGS="$(PWD)/printf_128.o" ../configure --prefix=$(SANDBOX) \
+												   --enable-maintainer-mode \
+												   --target=riscv$(XLEN)-unknown-elf
 
-binutils: ##! Compile binutils.
-	$(MAKE) -C riscv-binutils/build-$(XLEN) && $(MAKE) -C riscv-binutils/build-$(XLEN) install
+binutils: printf_128.o ##! Compile binutils.
+	$(MAKE) -C riscv-binutils/build-$(BUILD) && $(MAKE) -C riscv-binutils/build-$(BUILD) install
 
 check-binutils: ##! Run the riscv binutils testsuite.
-	$(MAKE) -C riscv-binutils/build-$(XLEN) $(CHECK) -k
+	$(MAKE) -C riscv-binutils/build-$(BUILD) $(CHECK) -k
 
 compare-binutils: ##! Compare binutils testsuite between upstream 64bits and patched 128bits. This require a 64bits toolchain built using XLEN=64 on the binutils upstream/master branch.
 	$(MAKE) check-binutils XLEN=64 > before.log
@@ -90,7 +104,7 @@ else
 MULTILIB_LIST =
 endif
 
-setup-gcc: riscv-gcc ##! Configure gcc compilation.
+setup-gcc: riscv-gcc printf_128.o ##! Configure gcc compilation.
 	@#
 	@# Strange error on libssp, so disable it
 	@# Plenty of warning because we're using int128 in unexpected places, but
@@ -100,20 +114,21 @@ setup-gcc: riscv-gcc ##! Configure gcc compilation.
 	cd riscv-gcc && \
 		mkdir build-$(XLEN) -p && \
 		cd build-$(XLEN) && \
-		CFLAGS="-O2 -g" CXXFLAGS="-O2 -g" CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
-																						   --target=riscv$(XLEN)-unknown-elf \
-																						   --enable-languages=c \
-																						   --enable-multilib \
-																						   $(MULTILIB_LIST) \
-																						   --with-cmodel=medany \
-																						   --disable-libssp \
-																						   --disable-nls
+		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" \
+		CFLAGS_FOR_TARGET="-mcmodel=medany" LDFLAGS="$(PWD)/printf_128.o" ../configure --prefix=$(SANDBOX) \
+																					   --target=riscv$(XLEN)-unknown-elf \
+																					   --enable-languages=c \
+																					   --enable-multilib \
+																					   $(MULTILIB_LIST) \
+																					   --with-cmodel=medany \
+																					   --disable-libssp \
+																					   --disable-nls
 
-gcc: riscv-gcc ##! Compile gcc.
+gcc: riscv-gcc printf_128.o ##! Compile gcc.
 	$(MAKE) -C riscv-gcc/build-$(XLEN) && $(MAKE) -C riscv-gcc/build-$(XLEN) install
 
 check-gcc: ##! Run the riscv gcc testsuite in QEMU simulator.
-	$(MAKE) -C riscv-gcc/build-$(XLEN) $(CHECK) -k RUNTESTFLAGS="--target_board=riscv-sim riscv.exp"
+	$(MAKE) -C riscv-gcc/build-$(XLEN) $(CHECK) -k RUNTESTFLAGS="--target_board=riscv$(XLEN)-sim $(RUNTESTFLAGS)"
 
 compare-gcc: ##! Compare gcc testsuite between upstream 64bits and patched 128bits. This require a 64bits toolchain built using XLEN=64 on the gcc upstream/master branch.
 	$(MAKE) check-gcc XLEN=64 > before.log

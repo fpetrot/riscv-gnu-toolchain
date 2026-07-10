@@ -117,7 +117,8 @@ RUN cd autoconf-2.69 && \
     make -j $(nproc) && make install
 
 # Add the riscv simulator file for dejagnu runtest
-COPY riscv-sim.exp /opt/tools/share/dejagnu/baseboards/riscv-sim.exp
+COPY riscv64-sim.exp /opt/tools/share/dejagnu/baseboards/riscv64-sim.exp
+COPY riscv128-sim.exp /opt/tools/share/dejagnu/baseboards/riscv128-sim.exp
 
 # Built binaries will be here
 ENV PATH="/work/sandbox/bin:$PATH"
