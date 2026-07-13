@@ -25,7 +25,7 @@ load_base_board_description "basic-sim"
 
 # Setup the simulator
 set_board_info sim "qemu-system-riscv64"
-set_board_info sim,options "-cpu rv64,g=on"
+set_board_info sim,options "-machine virt -cpu %CPU%,g=on -nographic -bios none -accel tcg,thread=single -kernel"
 
 # This tells it which directory to look in for the simulator.
 setup_sim riscv
@@ -39,11 +39,12 @@ set_board_info compiler "[find_gcc]"
 
 # The basic set of flags needed to build "hello world" for this
 # board. This board uses libgloss and newlib.
-set_board_info cflags   "[libgloss_include_flags] [newlib_include_flags]"
-set_board_info ldflags  "[libgloss_link_flags] [newlib_link_flags]"
+set_board_info cflags   "[libgloss_include_flags] [newlib_include_flags] -I/work/sandbox/riscv%XLEN%-unknown-elf/include -nostartfiles"
+set_board_info ldflags  "[libgloss_link_flags] [newlib_link_flags] \
+	-L/work/sandbox/riscv%XLEN%-unknown-elf/lib -L/work/sandbox/lib/gcc/riscv%XLEN%-unknown-elf/17.0.0 \
+	-L/work/rv%XLEN%_ariane_testharness -lrvb"
 
-# This board doesn't use a linker script.
-set_board_info ldscript ""
+set_board_info ldscript "-T/work/riscvbarelib/bsp/ariane_testharness/linkcmds"
 
 # And, it can't do arguments, and doesn't have real signals.
 set_board_info noargs 1
