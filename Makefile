@@ -33,6 +33,7 @@ build: version.json ##! Fetch, configure and compile every components.
 	$(MAKE) setup-qemu && $(MAKE) qemu
 	$(MAKE) riscvbarelib && $(MAKE) build-riscvbarelib
 	$(MAKE) riscvbareapps
+	$(MAKE) riscv-opcodes-128
 	$(MAKE) 128-test
 
 clean: ##! Cleanup everything.
@@ -221,6 +222,11 @@ riscvbareapps: ##! Fetch riscvbareapps examples.
 
 $(SANDBOX):
 	mkdir $(SANDBOX) -p
+
+##@ Opcodes
+
+riscv-opcodes-128: ##! Fetch riscv-opcodes-128 sources.
+	git clone https://github.com/fpetrot/riscv-opcodes-128.git
 
 ##@ Docker
 
