@@ -11,7 +11,7 @@ To make things easier (...) it is now under the form of a docker file that fetch
 This is necessary because the binutils require specific versions for the autotools (documented in binutils README-maintainer-mode) when building from scratch.
 All tools sources are kept after building, since this docker is meant to be used for active development.
 
-The docker image contains also a native `gdb` since there are still many bugs floating around, along with `vim` and a base configuration file, so you might get started quickly.
+The docker image contains also a native `gdb` since there are still many bugs floating around, so you might get started quickly.
 Note that `bash` is configured in `vi` mode, so you can remember what life was before the internet.
 
 For `gcc`, available ABI options are llp128, llp128f, llp128d.
@@ -45,9 +45,6 @@ $ docker attach dev128 #or docker exec -it dev128 bash
 # And if you need several shells in the container, with, e.g. tmux
 $ docker exec -it dev128 bash
 ```
-
-`scp` is available, so you can copy from the host your `.gitconfig` and `.ssh` directories to access the git repos at will.
-This is not the recommended use of docker, but I find it pretty adapted to the need.
 
 Structure of the container
 ==========================

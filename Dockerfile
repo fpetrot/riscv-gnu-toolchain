@@ -126,34 +126,3 @@ RUN cd autoconf-2.69 && \
     make -j $(nproc) && make install
 
 WORKDIR /work
-
-#
-# Give access for external ssh key so that the docker image can be shared
-# while being able to use git with ssh
-# FIMXE: I could not have that work, back onto https then
-#RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-#RUN --mount=type=ssh ssh -A -v -l git github.com
-
-#
-# Let's have some simple configuration, in particular autoindent that follows
-# GNU's or QEMU coding standards
-#
-# escape=\
-RUN echo "set -o vi" >> $HOMEDIR/.bashrc
-RUN echo "export LESSCHARSET=utf-8" >> $HOMEDIR/.bashrc
-RUN echo "export PATH=\$HOME/sandbox/bin:\$PATH" >> $HOMEDIR/.bashrc
-RUN echo "export RISCV=\$HOME/cva6/tools/toolchain:\$PATH" >> $HOMEDIR/.bashrc
-
-RUN echo "source \$VIMRUNTIME/defaults.vim" >> $HOMEDIR/.vimrc && \
-    echo "map ; ." >> $HOMEDIR/.vimrc && \
-    echo "set mouse=" >> $HOMEDIR/.vimrc && \
-    echo "function! GnuIndent()" >> $HOMEDIR/.vimrc && \
-    echo "setlocal cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1" >> $HOMEDIR/.vimrc && \
-    echo "setlocal shiftwidth=2" >> $HOMEDIR/.vimrc && \
-    echo "setlocal tabstop=8" >> $HOMEDIR/.vimrc && \
-    echo "endfunction" >> $HOMEDIR/.vimrc && \
-    echo "function! QemuIndent()" >> $HOMEDIR/.vimrc && \
-    echo "setlocal shiftwidth=4" >> $HOMEDIR/.vimrc && \
-    echo "setlocal expandtab" >> $HOMEDIR/.vimrc && \
-    echo "endfunction" >> $HOMEDIR/.vimrc && \
-    echo "au BufRead */qemu-*/*.{c,cpp,h} call QemuIndent()" >> $HOMEDIR/.vimrc
