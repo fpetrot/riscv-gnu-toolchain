@@ -1,5 +1,6 @@
 services:
-  riscv128:
+  riscv128-toolchain:
+    image: riscv128-toolchain
     build: .
     user: "${USER_ID}:${GROUP_ID}"
 

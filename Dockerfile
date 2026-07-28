@@ -3,14 +3,13 @@
 FROM debian:stable-slim
 
 LABEL maintainer="Frédéric Pétrot <frederic.petrot@univ-grenoble-alpes.fr>"
-LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards and also cva6 processor"
+LABEL Description="Image to (cross-)build the binutils in maintainer mode and gcc and qemu afterwards."
 
 #
 # Set environment
 #
 # Compile stuff in /root/src,
-# install non packaged dependencies in /opt/tools,
-# and do the rest as user fred
+# install non packaged dependencies in /opt/tools
 ENV ROOTSRCS=/root/src
 ENV INSTPATH=/opt/tools
 
@@ -19,27 +18,22 @@ ENV INSTPATH=/opt/tools
 #
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --no-install-suggests \
-        apt-utils \
         autoconf \
         automake \
         autotools-dev \
         autogen \
-        babeltrace \
-        bc \
         bison \
         build-essential \
         ca-certificates \
         ccache \
         cmake \
         curl \
-        device-tree-compiler \
         expect \
         file \
         flex \
         gawk \
         gperf \
         git \
-        gtkwave \
         help2man \
         less \
         libdebuginfod-dev \
@@ -54,19 +48,11 @@ RUN apt-get update && \
         libsystemc \
         libsystemc-dev \
         libtool \
-        numactl \
-        openssh-client \
         perl \
-        procps \
         python3 \
         texinfo \
-        vim \
-        vim-gitgutter \
-        wget \
         xsltproc \
-        z3 \
-        zlib1g \
-        zlib1g-dev && \
+        wget && \
     apt-get clean && \
     mkdir -p $INSTPATH $ROOTSRCS
 
@@ -82,6 +68,10 @@ RUN apt-get install -y --no-install-recommends --no-install-suggests \
 RUN apt-get install -y --no-install-recommends --no-install-suggests \
             gdb
 
+# Dependencies to run tests
+RUN apt-get install -y --no-install-recommends --no-install-suggests \
+            python3-pytest python3-pytest-xdist python3-matplotlib
+
 #
 # According to binutils README-maintainer-mode, we need
 # autoconf 2.69
@@ -92,6 +82,7 @@ RUN apt-get install -y --no-install-recommends --no-install-suggests \
 # All from https://ftp.gnu.org/gnu/
 #
 
+RUN mkdir -p $INSTPATH $ROOTSRCS
 WORKDIR $ROOTSRCS
 
 RUN curl --remote-name-all \
