@@ -22,6 +22,7 @@ help:
 	/^##@/ { printf "\n\033[36m%s\033[0m\n", substr($$0, 5) } \
 	END { printf "\n\033[35mXLEN=64\033[0m can be used on each commands to build the same tool in 64bits, or in 32bits. \
 	\n\033[35mCHECK=check-xxx\033[0m can be used on check commands to test a specific testsuite (check-gcc, check-ld, ...). \
+	\n\nArtifacts are build in \033[33m$(SANDBOX)\033[0m. \
 	\n\nExample: \033[33mmake check-binutils XLEN=64 CHECK=check-ld -j$$(nproc)\033[0m\n\n" }' $(MAKEFILE_LIST)
 
 ##@ General
