@@ -9,7 +9,6 @@ riscvbareapps/
 riscvbarelib/
 rv*_ariane_testharness/
 sandbox/
-printf_128.o
 testrun.log
 testrun.sum
 version.json

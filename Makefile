@@ -49,10 +49,6 @@ clean: ##! Cleanup everything.
 version.json:
 	curl https://api.github.com/repos/fpetrot/riscv-binutils/git/refs/heads/dev/128 > version.json
 
-# Build a custom specifier to print int128_t using printf
-printf_128.o: printf_128.c
-	$(CC) -c $^ -o $@
-
 ##@ Binutils
 
 riscv-binutils: ##! Fetch binutils sources and add upstream repo for rebasing regularly.
@@ -61,7 +57,7 @@ riscv-binutils: ##! Fetch binutils sources and add upstream repo for rebasing re
 	cd riscv-binutils && \
 		git remote add upstream https://sourceware.org/git/binutils-gdb.git
 
-setup-binutils: riscv-binutils printf_128.o ##! Configure binutils compilation.
+setup-binutils: riscv-binutils ##! Configure binutils compilation.
 	@#
 	@# Configure them so as to run in 128-bit, local install path
 	@# Removing the -O2 flags helps avoid run-time errors due to miss-use of the
@@ -71,12 +67,11 @@ setup-binutils: riscv-binutils printf_128.o ##! Configure binutils compilation.
 	cd riscv-binutils && \
 		mkdir build-$(BUILD) -p && \
 		cd build-$(BUILD) && \
-		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" \
-		LDFLAGS="$(PWD)/printf_128.o" ../configure --prefix=$(SANDBOX) \
-												   --enable-maintainer-mode \
-												   --target=riscv$(XLEN)-unknown-elf
+		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" ../configure --prefix=$(SANDBOX) \
+													   --enable-maintainer-mode \
+													   --target=riscv$(XLEN)-unknown-elf
 
-binutils: printf_128.o ##! Compile binutils.
+binutils: ##! Compile binutils.
 	$(MAKE) -C riscv-binutils/build-$(BUILD) && $(MAKE) -C riscv-binutils/build-$(BUILD) install
 
 check-binutils: ##! Run the riscv binutils testsuite.
@@ -106,7 +101,7 @@ else
 MULTILIB_LIST =
 endif
 
-setup-gcc: riscv-gcc printf_128.o ##! Configure gcc compilation.
+setup-gcc: riscv-gcc ##! Configure gcc compilation.
 	@#
 	@# Strange error on libssp, so disable it
 	@# Plenty of warning because we're using int128 in unexpected places, but
@@ -117,16 +112,16 @@ setup-gcc: riscv-gcc printf_128.o ##! Configure gcc compilation.
 		mkdir build-$(XLEN) -p && \
 		cd build-$(XLEN) && \
 		CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" \
-		CFLAGS_FOR_TARGET="-mcmodel=medany" LDFLAGS="$(PWD)/printf_128.o" ../configure --prefix=$(SANDBOX) \
-																					   --target=riscv$(XLEN)-unknown-elf \
-																					   --enable-languages=c \
-																					   --enable-multilib \
-																					   $(MULTILIB_LIST) \
-																					   --with-cmodel=medany \
-																					   --disable-libssp \
-																					   --disable-nls
+		CFLAGS_FOR_TARGET="-mcmodel=medany" ../configure --prefix=$(SANDBOX) \
+														 --target=riscv$(XLEN)-unknown-elf \
+														 --enable-languages=c \
+														 --enable-multilib \
+														 $(MULTILIB_LIST) \
+														 --with-cmodel=medany \
+														 --disable-libssp \
+														 --disable-nls
 
-gcc: riscv-gcc printf_128.o ##! Compile gcc.
+gcc: riscv-gcc ##! Compile gcc.
 	$(MAKE) -C riscv-gcc/build-$(XLEN) && $(MAKE) -C riscv-gcc/build-$(XLEN) install
 
 check-gcc: ##! Run the riscv gcc testsuite in QEMU simulator.
