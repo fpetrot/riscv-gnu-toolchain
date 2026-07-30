@@ -199,7 +199,7 @@ qemu: ##! Compile qemu.
 ##@ Tests
 
 128-test: ##! Fetch the existing 128-bit tests, as examples.
-	git clone -b dev/128 --origin origin https://github.com/fpetrot/128-test.git
+	git clone -b dev/128 --origin origin https://github.com/fpetrot/128-test.git --recurse-submodules
 
 check: 128-test ##! Run tests using the toolchain.
 	$(MAKE) -C 128-test check
