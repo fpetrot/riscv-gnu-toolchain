@@ -82,15 +82,20 @@ The `make check-binutils` and `make check-gcc` commands can be used to run the t
 
 Main contributors
 =================
-I would like to thanks my beloved students at Ensimag that choose to do their 2A (bachelor level) intership at TIMA on these subjects, without their help the project would struggle even more to survive!
+I would like to thanks my beloved students at Ensimag that choose to do their 1A/2A (bachelor level) intership at TIMA on these subjects, without their help the project would struggle even more to survive!
 
 In particular, I'd like to acknowledge the work of:
-- Fabien Portas (2020), that contributed to supporting 128-bit in QEMU, basis on which I build the upstreamed patches, thanks to the QEMU community for its open state of mind
-- Sylvain Noiry (2022), who did the work on gcc and the binutils, with no hope whatsover to be upstreamed
-- Liam-Angelo Giono (2025), who took over the binutils, made the newlib port, and added tests
-- Pierre Humblot (2025), that worked on the 128-bit CVA6 that is now part of the Docker, and who worked with Liam-Angelo to add tests and port them on the RTL
++ the ones that had to deal with teething problems
+    - Fabien Portas (2A/2020), that contributed to supporting 128-bit in QEMU, basis on which I build the upstreamed patches, thanks to the QEMU community for its open state of mind
+    - Sylvain Noiry (2A/2022), who bootstrapped the work on gcc and the binutils, with no hope whatsover to be upstreamed
+    - Liam-Angelo Giono (2A/2025), who took over the binutils, made the newlib port, and added tests
+    - Pierre Humblot (2A/2025), that worked on the 128-bit CVA6
+    - Albin Chaboissier (1A/2026) that didn't drown within the XiangShan in adding the 128-bit support 
++ the ones that achieved a clean working state
+    - Julien Thillard (1A/2026) that corrected a bunch of nasty bug in binutils and gcc, which allows to compile already relatively large programs
+    - Vincent Verdillon (1A/2026) that reshaped the cva6 so that it works as before in 32 and 64 bits, and now also works in 128-bit, although more thorough testing is needed before tape-out.
   
-I would also like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project).
+I would also like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project) and Inria for financing some internships.
 
 Optimistic Quote
 ================
