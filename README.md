@@ -52,6 +52,7 @@ Structure of the container
 
 - [128-test](https://github.com/fpetrot/128-test.git) (*dev/128*) : a set of tests 
 - [cva6](https://github.com/fpetrot/cva6.git) (*dev/128*) : a 128-bit version of the CVA6 RISC-V CPU
+- [xiangshan](https://gricad-gitlab.univ-grenoble-alpes.fr/chaboisa/xiangshan-128) (*kunminghu-128*) : a 128-bit version of the Xiangshan RISC-V high performance CPU.
 - [newlib](https://github.com/fpetrot/newlib.git) (*dev/128*) : a 128-bit version of the newlib libc (included in our compiler)
 - [qemu-riscv128](https://github.com/fpetrot/qemu-riscv128.git) (*dev/128*) : a version of qemu supporting the elf128 format
 - [riscv-binutils](https://github.com/fpetrot/riscv-binutils) (*dev/128*) : a 128-bit version of binutils 
