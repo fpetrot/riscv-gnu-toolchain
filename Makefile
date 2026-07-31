@@ -222,7 +222,7 @@ $(SANDBOX):
 ##@ Opcodes
 
 riscv-opcodes: ##! Fetch riscv-opcodes sources.
-	git clone https://github.com/fpetrot/riscv-opcodes.git
+	git clone -b dev/128 https://github.com/fpetrot/riscv-opcodes.git
 
 ##@ Docker
 
