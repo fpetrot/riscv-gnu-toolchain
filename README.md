@@ -92,7 +92,7 @@ In particular, I'd like to acknowledge the work of:
     - Pierre Humblot (2A/2025), that worked on the 128-bit CVA6
     - Albin Chaboissier (1A/2026) that didn't drown within the XiangShan in adding the 128-bit support 
 + the ones that achieved a clean working state
-    - Julien Thillard (1A/2026) that corrected a bunch of nasty bug in binutils and gcc, which allows to compile already relatively large programs
+    - Julien Thillard (1A/2026) that corrected a bunch of nasty bugs in binutils and gcc, which allows to compile already relatively large programs
     - Vincent Verdillon (1A/2026) that reshaped the cva6 so that it works as before in 32 and 64 bits, and now also works in 128-bit, although more thorough testing is needed before tape-out.
   
 I would also like to acknowledge the financial support of the French Agence Nationale de la Recherche under grant ANR-21-CE25-0016 (Maplurinium project) and Inria for financing some internships.
